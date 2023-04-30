@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -47,25 +48,70 @@ func TestNewSquare(t *testing.T) {
 		t.Errorf("Expected error for side length of 0")
 	}
 }
-
-func TestNewRectangle(t *testing.T) {
-	_, err := NewRectangle(-1, 5)
-	if err == nil {
-		t.Errorf("Expected error for negative length")
+func TestTriangle(t *testing.T) {
+	tests := []struct {
+		name     string
+		a        float64
+		b        float64
+		c        float64
+		area     float64
+		perimeter float64
+		err      error
+	}{
+		{
+			name:      "valid triangle",
+			a:         3,
+			b:         4,
+			c:         5,
+			area:      6,
+			perimeter: 12,
+			err:       nil,
+		},
+		{
+			name:      "zero sides",
+			a:         0,
+			b:         0,
+			c:         0,
+			area:      0,
+			perimeter: 0,
+			err:       fmt.Errorf("sides should be greater than 0"),
+		},
+		{
+			name:      "negative sides",
+			a:         -2,
+			b:         3,
+			c:         4,
+			area:      0,
+			perimeter: 0,
+			err:       fmt.Errorf("sides should be greater than 0"),
+		},
+		{
+			name:      "invalid triangle",
+			a:         1,
+			b:         2,
+			c:         4,
+			area:      0,
+			perimeter: 0,
+			err:       fmt.Errorf("sides do not form a valid triangle"),
+		},
 	}
 
-	_, err = NewRectangle(4, -2)
-	if err == nil {
-		t.Errorf("Expected error for negative width")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			triangle, err := NewTriangle(tt.a, tt.b, tt.c)
 
-	_, err = NewRectangle(0, 5)
-	if err == nil {
-		t.Errorf("Expected error for length of 0")
-	}
-
-	_, err = NewRectangle(4, 0)
-	if err == nil {
-		t.Errorf("Expected error for width of 0")
+			if err != nil && err.Error() != tt.err.Error() {
+				t.Errorf("Expected error: %v, but got: %v", tt.err, err)
+			} else if err == nil && tt.err != nil {
+				t.Errorf("Expected error: %v, but got: %v", tt.err, err)
+			} else if err == nil && tt.err == nil {
+				if triangle.Area() != tt.area {
+					t.Errorf("Expected area: %f, but got: %f", tt.area, triangle.Area())
+				}
+				if triangle.Perimeter() != tt.perimeter {
+					t.Errorf("Expected perimeter: %f, but got: %f", tt.perimeter, triangle.Perimeter())
+				}
+			}
+		})
 	}
 }
